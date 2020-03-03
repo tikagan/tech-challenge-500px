@@ -1,0 +1,25 @@
+
+.App {
+  text-align: center;
+  background-color: salmon;
+  min-height: 100vh;
+  
+  .album {
+    background-color: seagreen;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
+
+  .photo-container {
+    background-color: skyblue;
+    max-height: 20vh;
+    margin: 0.5em;
+
+    .photo {
+      max-height: inherit;
+    }
+  }
+
+}
