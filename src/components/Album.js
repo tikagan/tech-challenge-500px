@@ -12,7 +12,7 @@ class Album extends Component {
             if (window.innerHeight + document.documentElement.scrollTop + 1 >= document.documentElement.offsetHeight) {
                 this.props.getPhotos()
             }
-        }, 100)
+        }, 500)
     }
 
     componentDidMount() {
@@ -20,16 +20,16 @@ class Album extends Component {
     }
 
     render() {
-        const { error, photoLoaded, photos, photoURLChecker } = this.props
+        const { error, photoLoaded, photos, photoURLChecker, showModal } = this.props
         if (error) {
             return <div>Error: {error.message}</div>
         } else if (!photoLoaded) {
             return <div>Loading...</div>
-        } else if (photoLoaded && photos) {
+        } else if (photoLoaded && photos.length > 0) {
             return (
                 <div className='album'>
                     <Modal
-                        displayModal={this.props.modal}
+                        showModal={showModal}
                         closeModal={this.props.closeModal}
                         photo={this.props.modalTarget} />
                     {
@@ -42,12 +42,10 @@ class Album extends Component {
                                 user={photo.user.fullname}
                                 index={index}
                                 id={photo.id}
-                                selectModal={this.props.selectModal}
+                                setModal={this.props.setModal}
                             />
                         ))
                     }
-
-
                 </div>
             )
         }
