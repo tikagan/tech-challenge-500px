@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import debounce from 'lodash.debounce'
 
 import PhotoContainer from './PhotoContainer'
-
+import Modal from './Modal'
 
 class Album extends Component {
     constructor() {
@@ -19,17 +19,8 @@ class Album extends Component {
         this.props.getPhotos()
     }
 
-    photoURLChecker = (photoURL) => {
-        if (typeof (photoURL) === "string") {
-            return photoURL
-        } else if (photoURL && Array.isArray(photoURL)) {
-            return photoURL[0]
-        }
-
-    }
-
     render() {
-        const { error, photoLoaded, photos } = this.props
+        const { error, photoLoaded, photos, photoURLChecker } = this.props
         if (error) {
             return <div>Error: {error.message}</div>
         } else if (!photoLoaded) {
@@ -37,9 +28,22 @@ class Album extends Component {
         } else if (photoLoaded && photos) {
             return (
                 <div className='album'>
+                    <Modal
+                        displayModal={this.props.modal}
+                        closeModal={this.props.closeModal}
+                        photo={this.props.modalTarget} />
                     {
-                        photos.map(photo => (
-                            <PhotoContainer photoURL={this.photoURLChecker(photo.image_url)} alt={photo.description} key={photo.id} />
+                        photos.map((photo, index) => (
+                            <PhotoContainer
+                                key={photo.id}
+                                photoURL={photoURLChecker(photo.image_url)}
+                                alt={photo.description}
+                                name={photo.name}
+                                user={photo.user.fullname}
+                                index={index}
+                                id={photo.id}
+                                selectModal={this.props.selectModal}
+                            />
                         ))
                     }
 
