@@ -5,7 +5,6 @@ import './App.scss';
 
 import Album from './components/Album'
 
-
 class App extends Component {
   state = {
     error: false,
@@ -13,6 +12,39 @@ class App extends Component {
     photoLoaded: false,
     pagesLoaded: 0,
     photos: [],
+    modal: false,
+    modalTarget: {}
+  }
+
+  findPhotoByID = (index, eventId) => {
+    const photos = this.state.photos
+    if (photos[index].id == eventId) {
+      console.log("photos[index] ", photos[index])
+      return photos[index]
+    }
+  }
+
+  closeModal = (event) => {
+    this.setState({
+      modal: !this.state.modal
+    })
+  }
+
+  selectModal = (event) => {
+    if (event) {
+      console.log(event)
+      const photo = this.findPhotoByID(event.target.attributes.index.value, event.target.id)
+      this.setState({
+        modal: !this.state.modal,
+        modalTarget: {
+          id: photo.id,
+          photoURL: this.photoURLChecker(photo.image_url),
+          alt: photo.description,
+          user: photo.user.fullname,
+          name: photo.name
+        }
+      })
+    }
   }
 
   nextPage = () => {
@@ -39,13 +71,30 @@ class App extends Component {
       )
   }
 
-
+  photoURLChecker = (photoURL) => {
+    if (typeof (photoURL) === "string") {
+      return photoURL
+    } else if (photoURL && Array.isArray(photoURL)) {
+      return photoURL[0]
+    }
+  }
 
   render() {
     const { error, photos, photoLoaded, photoLoading } = this.state
+    // console.log("findPhotoByID ", this.findPhotoByID(35, 1011794681))
     return (
       <div className="App">
-        <Album getPhotos={this.getPhotos} photos={photos} photoLoaded={photoLoaded} photoLoading={photoLoading} />
+        <Album
+          getPhotos={this.getPhotos}
+          photos={photos}
+          photoLoaded={photoLoaded}
+          photoLoading={photoLoading}
+          selectModal={this.selectModal}
+          closeModal={this.closeModal}
+          modal={this.state.modal}
+          modalTarget={this.state.modalTarget}
+          photoURLChecker={this.photoURLChecker}
+        />
       </div>
     )
   }
