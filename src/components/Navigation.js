@@ -29,7 +29,9 @@ Navigation.propTypes = {
   nsfw: PropTypes.bool.isRequired,
   filterNsfw: PropTypes.func.isRequired,
   selectedFeed: PropTypes.string.isRequired,
-  selectFeed: PropTypes.func.isRequired
+  selectFeed: PropTypes.func.isRequired,
+  showNav: PropTypes.bool.isRequired,
+  toggleNav: PropTypes.func.isRequired
 }
 
 export default Navigation

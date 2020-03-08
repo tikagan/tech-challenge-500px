@@ -7,6 +7,8 @@ import Navigation from './components/Navigation'
 import Album from './components/Album'
 
 class App extends Component {
+  // because this app has such a small scope I chose to centralized the state in the root component 
+  // in a larger scoped app I would prefer to use Redux or some other state managment tool
   state = {
     error: false,
     photosLoading: true,
@@ -33,9 +35,11 @@ class App extends Component {
   infiniteScroll = () => {
     if (this.state.photosLoading) {
       return
+      // there are some issues with the way this method is calculating scroll height and is leading to multiple of 
+      // the same get requests creating duplicates in state.photos
+      // in the future I'd prefer to create an object data structure for the photos to eliminate duplicates from both 
+      // the API data itself as well as multiple duplicate calls
     } else if (window.innerHeight + window.pageYOffset + 1 >= document.documentElement.scrollHeight) {
-      console.log("window.innerHeight + window.pageYOffset + 1 ", window.innerHeight + window.pageYOffset + 1)
-      console.log("document.documentElement.scrollHeight ", document.documentElement.scrollHeight)
       this.setState({ photosLoading: true }, this.getPhotos)
     }
   }
@@ -51,7 +55,6 @@ class App extends Component {
     axios.get(`https://api.500px.com/v1/photos?feature=${this.state.selectedFeed}&consumer_key=${process.env.REACT_APP_API_KEY_500PX}${this.nsfwParam()}&page=${this.state.pagesLoaded + 1}`)
       .then(
         (result) => {
-          console.log("getPhotosRequest ", result.data.current_page)
           this.loadPhotos(result.data)
         },
         (error) => {
@@ -68,15 +71,18 @@ class App extends Component {
     return this.state.nsfw ? '' : '&exclude=nude'
   }
 
+  // adds API data into state based on whether it should be added to existing data (state.loadMorePhotos) 
+  // or should replace existing data
   loadPhotos = (photos) => {
     if (this.state.loadMorePhotos) {
-      console.log("if loadMorePhotos", photos.current_page)
       this.setState({
         photosLoading: false,
         photosLoaded: true,
         pagesLoaded: photos.current_page,
         photos: [...this.state.photos, ...photos.photos],
         loadMorePhotos: true,
+        // by initializing modalTarget with values on the inital render you can bypass prop-type errors 
+        // and therefore retain the benefit of checking the props passed to Modal
         modalTarget: {
           id: photos.photos[0].id,
           photoURL: this.photoURLChecker(photos.photos[0].image_url),
@@ -86,7 +92,6 @@ class App extends Component {
         }
       })
     } else {
-      console.log("if photos refresh ", photos.current_page)
       this.setState({
         photosLoading: false,
         photosLoaded: true,
@@ -97,6 +102,7 @@ class App extends Component {
     }
   }
 
+  // the photo URL provided in the API data is usually provided as the first element in an array
   photoURLChecker = (photoURL) => {
     if (typeof (photoURL) === 'string') {
       return photoURL
@@ -110,9 +116,11 @@ class App extends Component {
     this.setState({ showNav: !this.state.showNav })
   }
 
+
+  // selectFeed and filterNsfw both set state parameters that are then consulted in the the API call initiated by the setState
+  // callback getPhotos, including refreshing the page and resetting it to the top
+  // ideally since they are so similar I would have liked to find a way to combine them and pass in the required state value 
   selectFeed = (event) => {
-    event.persist()
-    console.log("event ", event)
     this.setState({
       selectedFeed: event.target.value,
       pagesLoaded: 0,
@@ -153,6 +161,7 @@ class App extends Component {
     }
   }
 
+  // finds the selected photo by comparing it's id in state located by index to the id provided by the event 
   findPhotoByID = (index, eventId) => {
     const photos = this.state.photos
     if (photos[index].id == eventId) {
@@ -162,6 +171,7 @@ class App extends Component {
 
   render() {
     const { error, selectedFeed, nsfw, showNav, photos, photosLoaded, photosLoading, showModal, modalTarget } = this.state
+    // ideally I would expand on the error state
     if (error) {
       return (
         <div>

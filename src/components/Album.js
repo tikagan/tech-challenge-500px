@@ -7,6 +7,7 @@ import Modal from './Modal'
 class Album extends Component {
 
   componentDidMount() {
+    // inital get request 
     this.props.getPhotos()
   }
 

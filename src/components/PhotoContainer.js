@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 const PhotoContainer = ({ photoURL, alt, id, index, setModal }) => {
   return (
-    <div className='photo-container' >
+    <div className='photo-container'>
       <img
         className='photo'
         src={photoURL}
