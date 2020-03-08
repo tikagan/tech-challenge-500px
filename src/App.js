@@ -17,21 +17,122 @@ class App extends Component {
     modalTarget: {},
     selectedFeed: 'popular',
     loadMorePhotos: true,
-    NSFW: false,
+    nsfw: false,
     showNav: false
   }
 
+  componentDidMount() {
+    window.addEventListener('scroll', this.infiniteScroll)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('scroll', this.infiniteScroll)
+  }
+
+  //App methods
+  infiniteScroll = () => {
+    if (this.state.photosLoading) {
+      return
+    } else if (window.innerHeight + window.pageYOffset + 1 >= document.documentElement.scrollHeight) {
+      console.log("window.innerHeight + window.pageYOffset + 1 ", window.innerHeight + window.pageYOffset + 1)
+      console.log("document.documentElement.scrollHeight ", document.documentElement.scrollHeight)
+      this.setState({ photosLoading: true }, this.getPhotos)
+    }
+  }
+
+  //Get and organize photo methods
+  getPhotos = () => {
+    if (this.state.photosLoading) {
+      this.setState({ photosLoading: false }, this.getPhotosRequest)
+    }
+  }
+
+  getPhotosRequest = () => {
+    axios.get(`https://api.500px.com/v1/photos?feature=${this.state.selectedFeed}&consumer_key=${process.env.REACT_APP_API_KEY_500PX}${this.nsfwParam()}&page=${this.state.pagesLoaded + 1}`)
+      .then(
+        (result) => {
+          console.log("getPhotosRequest ", result.data.current_page)
+          this.loadPhotos(result.data)
+        },
+        (error) => {
+          this.setState({
+            photosLoaded: true,
+            photosLoading: false,
+            error
+          })
+        }
+      )
+  }
+
+  nsfwParam = () => {
+    return this.state.nsfw ? '' : '&exclude=nude'
+  }
+
+  loadPhotos = (photos) => {
+    if (this.state.loadMorePhotos) {
+      console.log("if loadMorePhotos", photos.current_page)
+      this.setState({
+        photosLoading: false,
+        photosLoaded: true,
+        pagesLoaded: photos.current_page,
+        photos: [...this.state.photos, ...photos.photos],
+        loadMorePhotos: true,
+        modalTarget: {
+          id: photos.photos[0].id,
+          photoURL: this.photoURLChecker(photos.photos[0].image_url),
+          alt: photos.photos[0].description,
+          user: photos.photos[0].user.fullname,
+          name: photos.photos[0].name
+        }
+      })
+    } else {
+      console.log("if photos refresh ", photos.current_page)
+      this.setState({
+        photosLoading: false,
+        photosLoaded: true,
+        pagesLoaded: photos.current_page,
+        photos: photos.photos,
+        loadMorePhotos: true
+      })
+    }
+  }
+
+  photoURLChecker = (photoURL) => {
+    if (typeof (photoURL) === 'string') {
+      return photoURL
+    } else if (photoURL && Array.isArray(photoURL)) {
+      return photoURL[0]
+    }
+  }
+
+  //Navigation methods
   toggleNav = () => {
     this.setState({ showNav: !this.state.showNav })
   }
 
-  findPhotoByID = (index, eventId) => {
-    const photos = this.state.photos
-    if (photos[index].id == eventId) {
-      return photos[index]
-    }
+  selectFeed = (event) => {
+    event.persist()
+    console.log("event ", event)
+    this.setState({
+      selectedFeed: event.target.value,
+      pagesLoaded: 0,
+      photosLoading: true,
+      loadMorePhotos: false
+    }, this.getPhotos)
+    window.scrollTo(0, 0)
   }
 
+  filterNsfw = (event) => {
+    this.setState({
+      nsfw: event.target.checked,
+      pagesLoaded: 0,
+      photosLoading: true,
+      loadMorePhotos: false
+    }, this.getPhotos)
+    window.scrollTo(0, 0)
+  }
+
+  //Modal methods
   closeModal = () => {
     this.setState({ showModal: !this.state.showModal })
   }
@@ -52,106 +153,15 @@ class App extends Component {
     }
   }
 
-  loadPhotos = (photos) => {
-    if (this.state.loadMorePhotos) {
-      this.setState({
-        photosLoading: false,
-        photosLoaded: true,
-        pagesLoaded: photos.current_page,
-        photos: [...this.state.photos, ...photos.photos],
-        loadMorePhotos: true,
-        modalTarget: {
-          id: photos.photos[0].id,
-          photoURL: this.photoURLChecker(photos.photos[0].image_url),
-          alt: photos.photos[0].description,
-          user: photos.photos[0].user.fullname,
-          name: photos.photos[0].name
-        }
-      })
-    } else {
-      this.setState({
-        photosLoading: false,
-        photosLoaded: true,
-        pagesLoaded: photos.current_page,
-        photos: photos.photos,
-        pagesLoaded: 0,
-        loadMorePhotos: true
-      })
-    }
-  }
-
-  selectFeed = (event) => {
-    this.setState({
-      selectedFeed: event.target.value,
-      pagesLoaded: 0,
-      photosLoading: true,
-      loadMorePhotos: false
-    }, this.getPhotos)
-    window.scrollTo(0, 0)
-  }
-
-  NSFWParam = () => {
-    if (!this.state.NSFW) {
-      return "&exclude=nude"
-    } else {
-      return ""
-    }
-  }
-
-  filterNSFW = (event) => {
-    this.setState({
-      NSFW: event.target.checked,
-      loadMorePhotos: false,
-      photosLoading: true,
-      pagesLoaded: 0
-    }, this.getPhotos)
-    window.scrollTo(0, 0)
-  }
-
-  getPhotosRequest = () => {
-    axios.get(`https://api.500px.com/v1/photos?feature=${this.state.selectedFeed}&consumer_key=${process.env.REACT_APP_API_KEY_500PX}${this.NSFWParam()}&page=${this.state.pagesLoaded + 1}`)
-      .then(
-        (result) => {
-          this.loadPhotos(result.data)
-        },
-        (error) => {
-          this.setState({
-            photosLoaded: true,
-            photosLoading: false,
-            error
-          })
-        }
-      )
-  }
-
-  getPhotos = () => {
-    if (this.state.photosLoading) {
-      this.setState({ photosLoading: false }, this.getPhotosRequest)
-    }
-  }
-
-  isPageScrolling = () => {
-    window.addEventListener('scroll', this.infiniteScroll)
-  }
-
-  infiniteScroll = () => {
-    if (this.state.photosLoading) {
-      return
-    } else if (window.innerHeight + window.pageYOffset + 1 >= document.documentElement.scrollHeight) {
-      this.setState({ photosLoading: true }, this.getPhotos)
-    }
-  }
-
-  photoURLChecker = (photoURL) => {
-    if (typeof (photoURL) === 'string') {
-      return photoURL
-    } else if (photoURL && Array.isArray(photoURL)) {
-      return photoURL[0]
+  findPhotoByID = (index, eventId) => {
+    const photos = this.state.photos
+    if (photos[index].id == eventId) {
+      return photos[index]
     }
   }
 
   render() {
-    const { error, selectedFeed, NSFW, showNav, photos, photosLoaded, photosLoading, showModal, modalTarget } = this.state
+    const { error, selectedFeed, nsfw, showNav, photos, photosLoaded, photosLoading, showModal, modalTarget } = this.state
     if (error) {
       return (
         <div>
@@ -164,8 +174,8 @@ class App extends Component {
         <Navigation
           selectFeed={this.selectFeed}
           selectedFeed={selectedFeed}
-          NSFW={NSFW}
-          filterNSFW={this.filterNSFW}
+          nsfw={nsfw}
+          filterNsfw={this.filterNsfw}
           showNav={showNav}
           toggleNav={this.toggleNav}
         />
@@ -179,7 +189,6 @@ class App extends Component {
           showModal={showModal}
           modalTarget={modalTarget}
           photoURLChecker={this.photoURLChecker}
-          isPageScrolling={this.isPageScrolling}
         />
       </div>
     )

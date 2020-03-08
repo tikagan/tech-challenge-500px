@@ -8,8 +8,6 @@ class Album extends Component {
 
   componentDidMount() {
     this.props.getPhotos()
-    this.props.isPageScrolling()
-
   }
 
   render() {
@@ -45,7 +43,6 @@ class Album extends Component {
 
 Album.propTypes = {
   getPhotos: PropTypes.func.isRequired,
-  isPageScrolling: PropTypes.func.isRequired,
   error: PropTypes.object,
   photosLoaded: PropTypes.bool.isRequired,
   photos: PropTypes.array.isRequired,
