@@ -25,13 +25,20 @@ class App extends Component {
 
   componentDidMount() {
     window.addEventListener('scroll', this.infiniteScroll)
+    this.setState({ clientWidth: document.documentElement.clientWidth })
+    window.addEventListener('resize', this.responsive)
+
   }
 
   componentWillUnmount() {
     window.removeEventListener('scroll', this.infiniteScroll)
+    window.removeEventListener('resize', this.responsive)
+  }
+  //App methods
+  responsive = () => {
+    this.setState({ clientWidth: document.documentElement.clientWidth })
   }
 
-  //App methods
   infiniteScroll = () => {
     if (this.state.photosLoading) {
       return
@@ -80,7 +87,8 @@ class App extends Component {
         'photoURL': this.photoURLChecker(photo.image_url),
         'alt': photo.description ? photo.description : '',
         'name': photo.name ? photo.name : '',
-        'user': photo.user.fullname ? photo.user.fullname : ''
+        'user': photo.user.fullname ? photo.user.fullname : '',
+        'aspectRatio': photo.width / photo.height
       })
     })
     return photos
@@ -182,7 +190,7 @@ class App extends Component {
   }
 
   render() {
-    const { error, selectedFeed, nsfw, showNav, photos, photosLoaded, photosLoading, showModal, modalTarget } = this.state
+    const { error, selectedFeed, nsfw, showNav, photos, photosLoaded, photosLoading, showModal, modalTarget, clientWidth } = this.state
     // ideally I would expand on the error state
     if (error) {
       return (
@@ -211,6 +219,7 @@ class App extends Component {
           showModal={showModal}
           modalTarget={modalTarget}
           photoURLChecker={this.photoURLChecker}
+          clientWidth={clientWidth}
         />
       </div>
     )

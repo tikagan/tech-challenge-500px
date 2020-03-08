@@ -1,15 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const PhotoContainer = ({ photoURL, alt, id, setModal }) => {
+const PhotoContainer = ({ style, photoURL, alt, id, setModal, aspectRatio }) => {
   return (
-    <div className='photo-container'>
+    <div className='photo-container' style={style}>
       <img
         className='photo'
         src={photoURL}
         alt={alt}
         id={id}
         onClick={setModal}
+        aspectRatio={aspectRatio}
       />
     </div>
   )

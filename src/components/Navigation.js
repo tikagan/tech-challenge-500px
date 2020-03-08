@@ -11,14 +11,14 @@ const Navigation = ({ nsfw, filterNsfw, selectedFeed, selectFeed, showNav, toggl
       <div className='nav-right'>
         <div className='nsfw-toggle'>
           <input type='checkbox' id='nsfw-checkbox' defaultChecked={nsfw} onChange={filterNsfw} />
-          <label className='nsfw-label' htmlFor='nsfw-checkbox'>nsfw</label>
+          <label className='nsfw-label' htmlFor='nsfw-checkbox'>NSFW</label>
         </div>
         <select className='feeds' value={selectedFeed} onChange={selectFeed}>
           <option value='popular'>Popular</option>
           <option value='highest_rated'>Highest Rated</option>
           <option value='upcoming'>Upcoming</option>
           <option value='editors'>Editor's Choice</option>
-          <option value='fresh_today'>Fresh</option>
+          <option value='fresh_week'>Fresh</option>
         </select>
       </div>
     </div>
