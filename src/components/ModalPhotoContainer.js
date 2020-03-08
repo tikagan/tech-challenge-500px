@@ -5,7 +5,7 @@ import PropTypes from 'prop-types'
 // creating it as it's own component with separate prop-type verification was warranted 
 const ModalPhotoContainer = ({ photoURL, alt, stopPropagationAndCloseModal }) => {
   return (
-    <div className='photo-container'>
+    <div className='modal-photo-container'>
       <img
         className='photo'
         src={photoURL}

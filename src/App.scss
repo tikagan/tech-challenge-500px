@@ -10,6 +10,7 @@
     right: -18em;
     height: 5em;
     width: 20em;
+    z-index: 3;
     background-color: rgba(0,0,0,0.2);
     border-radius: .3em 0 0 .3em;
     padding: 0 1em;
@@ -53,6 +54,15 @@
 
     .nav-right {
       flex-grow: 1;
+
+      .feeds {
+        background-color: transparent;
+        color: white;
+        font-size: 1.2em;
+        border: 0;
+        border-radius: 0;
+        box-shadow: 0 0 0 0.2em rgba(255,255,255,0.2);
+      }
     }
 
     &.show {
@@ -68,22 +78,19 @@
 
 
   .album {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    height: 100vh;
-    background-color: whitesmoke;
-  }
-
-  .photo-container {
-    max-height: 20vh;
-    margin: 0.5em;
-
-    .photo {
-      max-height: inherit;
+    .photo-container img {
+      width: 100%;
     }
   }
+
+  // .photo-container {
+  //   max-height: 20vh;
+  //   margin: 0.5em;
+
+  //   .photo {
+  //     max-height: inherit;
+  //   }
+  // }
 
   .modal {
     display: none;
@@ -109,7 +116,7 @@
       height: auto;
       margin: auto;
 
-      .photo-container {
+      .modal-photo-container {
         max-height: 100%;
         max-width: 100%;
         margin-top: 0;
@@ -157,11 +164,3 @@
   }
 }
 
-@keyframes strikethrough {
-	from {
-		transform: scaleX(0);
-	}
-	to {
-		transform: scaleX(1);
-	}
-}

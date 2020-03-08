@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
+import JustifiedLayout from 'react-justified-layout'
 
 import PhotoContainer from './PhotoContainer'
 import Modal from './Modal'
+
 
 class Album extends Component {
 
@@ -20,7 +22,8 @@ class Album extends Component {
   }
 
   render() {
-    const { error, photosLoaded, photos, showModal, closeModal, modalTarget, setModal } = this.props
+    const { error, photosLoaded, photos, showModal, closeModal, modalTarget, setModal, clientWidth } = this.props
+
     if (error) {
       return <div>Error: {error.message}</div>
     } else if (!photosLoaded) {
@@ -32,18 +35,20 @@ class Album extends Component {
             showModal={showModal}
             closeModal={closeModal}
             photo={modalTarget} />
-          {
-            this.photosArr(photos).map((photo) => (
-              <PhotoContainer
-                key={photo.id}
-                photoURL={photo.photoURL}
-                alt={photo.alt}
-                // index={index}
-                id={photo.id}
-                setModal={setModal}
-              />
-            ))
-          }
+          <JustifiedLayout containerWidth={clientWidth} showWidows={false}>
+            {
+              this.photosArr(photos).map((photo) => (
+                <PhotoContainer
+                  key={photo.id}
+                  photoURL={photo.photoURL}
+                  alt={photo.alt}
+                  aspectRatio={photo.aspectRatio}
+                  id={photo.id}
+                  setModal={setModal}
+                />
+              ))
+            }
+          </JustifiedLayout>
         </div>
       )
     }
@@ -60,7 +65,9 @@ Album.propTypes = {
   showModal: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   modalTarget: PropTypes.object.isRequired,
-  setModal: PropTypes.func.isRequired
+  setModal: PropTypes.func.isRequired,
+  aspectRatio: PropTypes.number.isRequired,
+  clientWidth: PropTypes.number.isRequired
 }
 
 export default Album
