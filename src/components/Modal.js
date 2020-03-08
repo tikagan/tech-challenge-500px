@@ -1,30 +1,32 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 
-import PhotoContainer from './PhotoContainer'
+import ModalPhotoContainer from './ModalPhotoContainer'
 
-class Modal extends Component {
+const Modal = ({ photo, showModal, closeModal }) => {
+  const stopPropagationAndCloseModal = (event) => {
+    event.stopPropagation()
+    closeModal()
+  }
+  return (
+    <div className={`modal ${showModal ? 'show' : ''}`} onClick={stopPropagationAndCloseModal} >
+      <div className='close' onClick={stopPropagationAndCloseModal}>&times;</div>
+      <div className='modal-content' onClick={stopPropagationAndCloseModal}>
+        <ModalPhotoContainer photoURL={photo.photoURL} alt={photo.alt} id={photo.id} stopPropagationAndCloseModal={stopPropagationAndCloseModal} />
+        <div className='photo-info'>
+          <h1>{photo.name}</h1>
+          <h2>{photo.user}</h2>
+          <h3>{photo.alt}</h3>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-    stopPropagationAndCloseModal = (event) => {
-        event.stopPropagation()
-        this.props.closeModal()
-    }
-    render() {
-        const { photo, showModal } = this.props
-        const { alt, id, name, photoURL, user } = photo
-        return (
-            <div className={`modal ${showModal ? 'show' : ''}`} onClick={this.stopPropagationAndCloseModal} >
-                <div className='close' onClick={this.stopPropagationAndCloseModal}>&times;</div>
-                <div className='modal-content' onClick={(event) => event.stopPropagation()}>
-                    <PhotoContainer photoURL={photoURL} alt={alt} key={id} />
-                    <div className='photo-info'>
-                        <h1>{name}</h1>
-                        <h2>{user}</h2>
-                        <h3>{alt}</h3>
-                    </div>
-                </div>
-            </div>
-        )
-    }
+Modal.propTypes = {
+  photo: PropTypes.object.isRequired,
+  showModal: PropTypes.bool.isRequired,
+  closeModal: PropTypes.func.isRequired
 }
 
 export default Modal
