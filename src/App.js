@@ -8,13 +8,13 @@ import Album from './components/Album'
 
 class App extends Component {
   // because this app has such a small scope I chose to centralized the state in the root component 
-  // in a larger scoped app I would prefer to use Redux or some other state managment tool
+  // in a larger app I would prefer to use Redux or some other state managment tool
   state = {
     error: false,
     photosLoading: true,
     photosLoaded: false,
     pagesLoaded: 0,
-    photos: [],
+    photos: {},
     showModal: false,
     modalTarget: {},
     selectedFeed: 'popular',
@@ -40,6 +40,7 @@ class App extends Component {
       // in the future I'd prefer to create an object data structure for the photos to eliminate duplicates from both 
       // the API data itself as well as multiple duplicate calls
     } else if (window.innerHeight + window.pageYOffset + 1 >= document.documentElement.scrollHeight) {
+      // getPhotos is passed as as callback to setState as it will not execute unless photosLoading is true
       this.setState({ photosLoading: true }, this.getPhotos)
     }
   }
@@ -47,6 +48,8 @@ class App extends Component {
   //Get and organize photo methods
   getPhotos = () => {
     if (this.state.photosLoading) {
+      // setting photosLoading to false here stops additional calls of getPhotos from calling getPhotosRequest 
+      // because getPhotosRequest is being called as a callback to setState
       this.setState({ photosLoading: false }, this.getPhotosRequest)
     }
   }
@@ -71,6 +74,20 @@ class App extends Component {
     return this.state.nsfw ? '' : '&exclude=nude'
   }
 
+  photoDict = (apiPhotos, photos = {}) => {
+    apiPhotos.forEach((photo, index) => {
+      photos[photo.id] = {
+        'id': photo.id,
+        'photoURL': this.photoURLChecker(photo.image_url),
+        'index': index,
+        'alt': photo.description,
+        'name': photo.name,
+        'user': photo.user.fullname
+      }
+    })
+    return photos
+  }
+
   // adds API data into state based on whether it should be added to existing data (state.loadMorePhotos) 
   // or should replace existing data
   loadPhotos = (photos) => {
@@ -79,7 +96,7 @@ class App extends Component {
         photosLoading: false,
         photosLoaded: true,
         pagesLoaded: photos.current_page,
-        photos: [...this.state.photos, ...photos.photos],
+        photos: this.photoDict(photos.photos, this.state.photos),
         loadMorePhotos: true,
         // by initializing modalTarget with values on the inital render you can bypass prop-type errors 
         // and therefore retain the benefit of checking the props passed to Modal
@@ -96,7 +113,7 @@ class App extends Component {
         photosLoading: false,
         photosLoaded: true,
         pagesLoaded: photos.current_page,
-        photos: photos.photos,
+        // photos: this.photoDict(photos.photos),
         loadMorePhotos: true
       })
     }
@@ -147,26 +164,23 @@ class App extends Component {
 
   setModal = (event) => {
     if (event) {
-      const photo = this.findPhotoByID(event.target.attributes.index.value, event.target.id)
+      const photo = this.findPhotoByID(event.target.id)
       this.setState({
         showModal: !this.state.showModal,
         modalTarget: {
           id: photo.id,
-          photoURL: this.photoURLChecker(photo.image_url),
-          alt: photo.description,
-          user: photo.user.fullname,
+          photoURL: this.photoURLChecker(photo.photoURL),
+          alt: photo.alt,
+          user: photo.user,
           name: photo.name
         }
       })
     }
   }
 
-  // finds the selected photo by comparing it's id in state located by index to the id provided by the event 
-  findPhotoByID = (index, eventId) => {
+  findPhotoByID = (eventId) => {
     const photos = this.state.photos
-    if (photos[index].id == eventId) {
-      return photos[index]
-    }
+    return photos[eventId]
   }
 
   render() {

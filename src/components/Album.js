@@ -12,12 +12,12 @@ class Album extends Component {
   }
 
   render() {
-    const { error, photosLoaded, photos, photoURLChecker, showModal, closeModal, modalTarget, setModal } = this.props
+    const { error, photosLoaded, photos, showModal, closeModal, modalTarget, setModal } = this.props
     if (error) {
       return <div>Error: {error.message}</div>
     } else if (!photosLoaded) {
       return <div>Loading...</div>
-    } else if (photosLoaded && photos.length > 0) {
+    } else if (photosLoaded && Object.keys(photos).length > 0) {
       return (
         <div className='album'>
           <Modal
@@ -25,13 +25,13 @@ class Album extends Component {
             closeModal={closeModal}
             photo={modalTarget} />
           {
-            photos.map((photo, index) => (
+            Object.keys(photos).map((photo, index) => (
               <PhotoContainer
-                key={photo.id}
-                photoURL={photoURLChecker(photo.image_url)}
-                alt={photo.description}
-                index={index}
-                id={photo.id}
+                key={photos[photo].id}
+                photoURL={photos[photo].photoURL}
+                alt={photos[photo].alt}
+                // index={index}
+                id={photos[photo].id}
                 setModal={setModal}
               />
             ))
@@ -46,7 +46,7 @@ Album.propTypes = {
   getPhotos: PropTypes.func.isRequired,
   error: PropTypes.object,
   photosLoaded: PropTypes.bool.isRequired,
-  photos: PropTypes.array.isRequired,
+  photos: PropTypes.object.isRequired,
   photoURLChecker: PropTypes.func.isRequired,
   showModal: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
