@@ -14,7 +14,7 @@ class App extends Component {
     photosLoading: true,
     photosLoaded: false,
     pagesLoaded: 0,
-    photos: {},
+    photos: new Map(),
     showModal: false,
     modalTarget: {},
     selectedFeed: 'popular',
@@ -35,10 +35,9 @@ class App extends Component {
   infiniteScroll = () => {
     if (this.state.photosLoading) {
       return
-      // there are some issues with the way this method is calculating scroll height and is leading to multiple of 
-      // the same get requests creating duplicates in state.photos
-      // in the future I'd prefer to create an object data structure for the photos to eliminate duplicates from both 
-      // the API data itself as well as multiple duplicate calls
+      // there are some issues with the way this method is calculating scroll height and was leading to multiples of 
+      // the same get requests creating photo duplicates, this is currently trapped by photoMap which also accounts
+      // for duplicates in the API data
     } else if (window.innerHeight + window.pageYOffset + 1 >= document.documentElement.scrollHeight) {
       // getPhotos is passed as as callback to setState as it will not execute unless photosLoading is true
       this.setState({ photosLoading: true }, this.getPhotos)
@@ -74,16 +73,15 @@ class App extends Component {
     return this.state.nsfw ? '' : '&exclude=nude'
   }
 
-  photoDict = (apiPhotos, photos = {}) => {
+  photoMap = (apiPhotos, photos = new Map()) => {
     apiPhotos.forEach((photo, index) => {
-      photos[photo.id] = {
+      photos.set(photo.id, {
         'id': photo.id,
         'photoURL': this.photoURLChecker(photo.image_url),
-        'index': index,
-        'alt': photo.description,
-        'name': photo.name,
-        'user': photo.user.fullname
-      }
+        'alt': photo.description ? photo.description : '',
+        'name': photo.name ? photo.name : '',
+        'user': photo.user.fullname ? photo.user.fullname : ''
+      })
     })
     return photos
   }
@@ -96,7 +94,7 @@ class App extends Component {
         photosLoading: false,
         photosLoaded: true,
         pagesLoaded: photos.current_page,
-        photos: this.photoDict(photos.photos, this.state.photos),
+        photos: this.photoMap(photos.photos, this.state.photos),
         loadMorePhotos: true,
         // by initializing modalTarget with values on the inital render you can bypass prop-type errors 
         // and therefore retain the benefit of checking the props passed to Modal
@@ -113,7 +111,7 @@ class App extends Component {
         photosLoading: false,
         photosLoaded: true,
         pagesLoaded: photos.current_page,
-        // photos: this.photoDict(photos.photos),
+        photos: this.photoMap(photos.photos),
         loadMorePhotos: true
       })
     }
@@ -180,7 +178,7 @@ class App extends Component {
 
   findPhotoByID = (eventId) => {
     const photos = this.state.photos
-    return photos[eventId]
+    return photos.get(parseInt(eventId))
   }
 
   render() {

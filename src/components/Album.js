@@ -11,13 +11,21 @@ class Album extends Component {
     this.props.getPhotos()
   }
 
+  photosArr = (photos) => {
+    let photosArr = []
+    for (const photo of photos) {
+      photosArr.push(photo[1])
+    }
+    return photosArr
+  }
+
   render() {
     const { error, photosLoaded, photos, showModal, closeModal, modalTarget, setModal } = this.props
     if (error) {
       return <div>Error: {error.message}</div>
     } else if (!photosLoaded) {
       return <div>Loading...</div>
-    } else if (photosLoaded && Object.keys(photos).length > 0) {
+    } else if (photosLoaded && photos.size > 0) {
       return (
         <div className='album'>
           <Modal
@@ -25,13 +33,13 @@ class Album extends Component {
             closeModal={closeModal}
             photo={modalTarget} />
           {
-            Object.keys(photos).map((photo, index) => (
+            this.photosArr(photos).map((photo) => (
               <PhotoContainer
-                key={photos[photo].id}
-                photoURL={photos[photo].photoURL}
-                alt={photos[photo].alt}
+                key={photo.id}
+                photoURL={photo.photoURL}
+                alt={photo.alt}
                 // index={index}
-                id={photos[photo].id}
+                id={photo.id}
                 setModal={setModal}
               />
             ))
@@ -39,6 +47,7 @@ class Album extends Component {
         </div>
       )
     }
+
   }
 }
 
