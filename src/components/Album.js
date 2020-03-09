@@ -18,7 +18,6 @@ class Album extends Component {
     for (const photo of photos) {
       photosArr.push(photo[1])
     }
-    console.log("photosArr ", photosArr)
     return photosArr
   }
 
@@ -66,7 +65,10 @@ Album.propTypes = {
   showModal: PropTypes.bool.isRequired,
   closeModal: PropTypes.func.isRequired,
   modalTarget: PropTypes.object.isRequired,
-  setModal: PropTypes.func.isRequired
+  setModal: PropTypes.func.isRequired,
+  aspectRatio: PropTypes.number.isRequired,
+  clientWidth: PropTypes.number.isRequired
+
 }
 
 export default Album
